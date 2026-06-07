@@ -32,15 +32,14 @@ python3 install.py
 
 ### 支持的 AI 工具
 
-| 工具 | 安装方式 | 说明 |
-|------|---------|------|
-| **Claude Code** | Skill | Anthropic Claude Code CLI |
-| **Codex (OpenAI)** | Tool | OpenAI Codex CLI |
-| **OpenClaw** | MCP | OpenClaw AI assistant |
-| **Cursor** | MCP | Cursor AI editor |
-| **Windsurf** | MCP | Windsurf AI editor |
-| **Continue** | MCP | Continue VS Code extension |
-| **通用 MCP** | MCP | 任意支持 MCP 协议的 AI |
+| 工具 | 安装路径 |
+|------|---------|
+| **Claude Code** | `~/.claude/skills/web-search/` |
+| **Codex (OpenAI)** | `~/.codex/tools/web-search/` |
+| **OpenClaw** | `~/.openclaw/tools/web-search/` |
+| **Cursor** | `~/.cursor/tools/web-search/` |
+| **Windsurf** | `~/.windsurf/tools/web-search/` |
+| **Continue** | `~/.continue/tools/web-search/` |
 
 ### 方式二：手动安装
 
@@ -244,27 +243,29 @@ for r in result.get("results", []):
 
 ### 各 AI 工具使用方法
 
-#### Claude Code
+所有工具统一使用相同的命令格式，只是路径不同：
 
 ```bash
+# Claude Code
 ~/.claude/skills/web-search/search.py "搜索内容"
+
+# Codex (OpenAI)
+~/.codex/tools/web-search/search.py "搜索内容"
+
+# Cursor
+~/.cursor/tools/web-search/search.py "搜索内容"
+
+# Windsurf
+~/.windsurf/tools/web-search/search.py "搜索内容"
+
+# Continue
+~/.continue/tools/web-search/search.py "搜索内容"
+
+# OpenClaw
+~/.openclaw/tools/web-search/search.py "搜索内容"
 ```
 
-#### Codex (OpenAI)
-
-```bash
-~/.codex/tools/web-search/run.sh "搜索内容"
-```
-
-#### Cursor / Windsurf / Continue (MCP)
-
-这些工具通过 MCP 协议集成，安装后会自动注册为可用工具。
-
-在 AI 对话中直接说：
-- "帮我搜索 Python best practices"
-- "用 web_search 搜索 React hooks"
-
-#### 通用方式
+或者直接使用项目目录：
 
 ```bash
 python3 search.py "搜索内容"
@@ -348,9 +349,8 @@ unified-web-search/
 ├── .gitignore            # Git 忽略规则
 ├── config.example.json   # 配置示例
 ├── setup.py              # 包安装配置
-├── install.py            # 交互式安装脚本（支持多 AI 工具）
+├── install.py            # 交互式安装脚本
 ├── search.py             # 主入口脚本
-├── mcp_server.py         # MCP 服务器（自动生成）
 └── src/
     ├── __init__.py
     ├── config.py         # 配置管理
