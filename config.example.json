@@ -1,0 +1,19 @@
+{
+  "proxy": {
+    "enabled": false,
+    "url": "http://localhost:7897"
+  },
+  "keys": [
+    {
+      "provider": "tavily",
+      "key": "tvly-dev-your-key-here"
+    },
+    {
+      "provider": "exa",
+      "key": "your-exa-key-here"
+    }
+  ],
+  "default_count": 5,
+  "default_depth": "basic",
+  "fallback": true
+}
