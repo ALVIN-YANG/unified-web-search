@@ -2,33 +2,165 @@
 
 统一搜索工具，支持多个搜索提供商（Tavily、Exa 等），全局 key 池轮询。
 
-## 特性
+## ✨ 特性
 
 - ✅ **全局 Key 池**：所有 key 统一管理，轮询使用
 - ✅ **多提供商**：支持 Tavily、Exa，易于扩展
 - ✅ **故障转移**：主 key 失败自动切换下一个
 - ✅ **代理支持**：HTTP/HTTPS 代理配置
 - ✅ **零硬编码**：所有配置外置
+- ✅ **交互式安装**：引导式配置向导
 
-## 安装
+## 🚀 快速开始
+
+### 方式一：交互式安装（推荐）
 
 ```bash
 # 克隆项目
-git clone https://github.com/yourusername/unified-web-search.git
+git clone https://github.com/ALVIN-YANG/unified-web-search.git
 cd unified-web-search
 
-# 创建符号链接到 Claude skills 目录
-ln -s "$(pwd)" ~/.claude/skills/web-search
+# 运行安装向导
+python3 install.py
 ```
 
-## 配置
+安装向导会引导你完成：
+1. 代理配置
+2. API key 添加
+3. Claude Code skill 安装
 
-首次运行会自动创建配置文件 `~/.claude/skills/web-search/config.json`：
+### 方式二：手动安装
+
+```bash
+# 克隆项目
+git clone https://github.com/ALVIN-YANG/unified-web-search.git
+cd unified-web-search
+
+# 复制配置示例
+cp config.example.json config.json
+
+# 编辑配置
+vim config.json
+
+# 测试运行
+python3 search.py --check
+```
+
+## ⚙️ 代理配置
+
+如果你的网络环境需要代理才能访问外部 API，请按以下步骤配置。
+
+### 常见代理软件端口
+
+| 代理软件 | 默认端口 | 代理地址 |
+|---------|---------|---------|
+| **Clash** | 7897 | `http://localhost:7897` |
+| **Clash Verge** | 7897 | `http://localhost:7897` |
+| **V2Ray** | 10809 | `http://localhost:10809` |
+| **Shadowsocks** | 1080 | `http://localhost:1080` |
+| **Surge** | 6152 | `http://localhost:6152` |
+| **Quantumult X** | 9090 | `http://localhost:9090` |
+
+### 配置方式
+
+#### 方式一：使用安装向导
+
+```bash
+python3 install.py
+# 在代理配置步骤选择"是"并输入代理地址
+```
+
+#### 方式二：手动编辑配置文件
+
+编辑 `config.json`：
 
 ```json
 {
   "proxy": {
-    "enabled": false,
+    "enabled": true,
+    "url": "http://localhost:7897"
+  }
+}
+```
+
+#### 方式三：命令行参数
+
+```bash
+# 临时使用代理（开发中）
+python3 search.py --proxy http://localhost:7897 "搜索内容"
+```
+
+### 验证代理
+
+```bash
+# 测试代理连接
+curl -x http://localhost:7897 https://api.tavily.com --connect-timeout 5
+
+# 测试搜索
+python3 search.py "test" --check
+```
+
+### 代理故障排查
+
+1. **检查代理是否运行**
+   ```bash
+   # Clash
+   curl http://localhost:7897
+   
+   # 或查看进程
+   ps aux | grep clash
+   ```
+
+2. **检查代理端口**
+   ```bash
+   lsof -i :7897
+   ```
+
+3. **测试代理连接**
+   ```bash
+   curl -x http://localhost:7897 https://www.google.com
+   ```
+
+4. **查看代理日志**
+   - Clash: 查看 `~/.config/clash/` 目录
+   - V2Ray: 查看日志文件
+
+## 🔑 API Key 配置
+
+### 获取 API Key
+
+#### Tavily（免费 1000 次/月）
+
+1. 访问 https://app.tavily.com/home
+2. 注册账号
+3. 在 Dashboard 获取 API key
+
+#### Exa（免费 1000 次/月）
+
+1. 访问 https://exa.ai
+2. 注册账号
+3. 在 Dashboard 获取 API key
+
+### 添加 Key
+
+```bash
+# 使用安装向导
+python3 install.py
+
+# 或命令行添加
+python3 search.py --add-key tavily "tvly-dev-xxx"
+python3 search.py --add-key exa "exa-xxx"
+
+# 查看当前配置
+python3 search.py --check
+```
+
+### 配置文件格式
+
+```json
+{
+  "proxy": {
+    "enabled": true,
     "url": "http://localhost:7897"
   },
   "keys": [
@@ -47,22 +179,12 @@ ln -s "$(pwd)" ~/.claude/skills/web-search
 }
 ```
 
-### 添加 Key
-
-```bash
-# 添加 Tavily key
-python3 search.py --add-key tavily "tvly-dev-xxx"
-
-# 添加 Exa key
-python3 search.py --add-key exa "exa-xxx"
-```
-
-## 使用
+## 📖 使用方法
 
 ### 命令行
 
 ```bash
-# 基本搜索
+# 基本搜索（使用默认提供商）
 python3 search.py "Python best practices"
 
 # 指定提供商
@@ -77,55 +199,147 @@ python3 search.py "AI trends" --depth advanced
 # JSON 输出
 python3 search.py "搜索内容" --json
 
-# 查看配置
+# 查看配置状态
 python3 search.py --check
+
+# 添加 key
+python3 search.py --add-key tavily "tvly-dev-xxx"
+
+# 移除 key
+python3 search.py --remove-key tavily "tvly-dev-xxx"
 ```
 
-### Python
+### Python API
 
 ```python
 from src.search import UnifiedSearch
 
+# 初始化（自动加载配置）
 search = UnifiedSearch()
+
+# 搜索
 result = search.search("Python best practices", count=5)
 
-print(result["answer"])  # Tavily 返回的答案
-for r in result["results"]:
+# 打印答案（Tavily 返回）
+if result.get("answer"):
+    print(f"答案: {result['answer']}")
+
+# 打印结果
+for r in result.get("results", []):
     print(f"- {r['title']}: {r['url']}")
 ```
 
-## 轮询机制
+### Claude Code Skill
+
+安装后可直接在 Claude Code 中使用：
+
+```bash
+~/.claude/skills/web-search/search.py "搜索内容"
+```
+
+## 🔄 轮询机制
 
 所有 key 存储在统一池中，按顺序轮询：
 
 ```
-keys[0] → keys[1] → keys[2] → keys[0] → ...
+keys[0] → keys[1] → keys[2] → ... → keys[n] → keys[0]
 ```
+
+**示例：**
+
+假设有 3 个 key：
+- `tavily-key-1`
+- `exa-key-1`
+- `tavily-key-2`
+
+轮询顺序：
+1. `tavily-key-1`
+2. `exa-key-1`
+3. `tavily-key-2`
+4. `tavily-key-1`（循环）
 
 不区分提供商，全局轮询。
 
-## 故障转移
+## 🔁 故障转移
 
-当某个 key 请求失败时，自动尝试下一个 key。
+当 `fallback: true` 时：
 
-## 扩展提供商
+1. 主 key 请求失败
+2. 自动尝试下一个 key
+3. 直到成功或所有 key 都失败
 
-在 `src/providers/` 目录添加新提供商：
+## 🛠️ 扩展提供商
+
+### 1. 创建提供商类
 
 ```python
 # src/providers/new_provider.py
-from .base import BaseProvider
+from .base import BaseProvider, SearchResponse, SearchResult
 
 class NewProvider(BaseProvider):
     name = "new_provider"
+    api_url = "https://api.new-provider.com/search"
 
-    def search(self, query: str, count: int, **kwargs) -> dict:
+    def search(self, query: str, api_key: str, count: int = 5, **kwargs) -> SearchResponse:
         # 实现搜索逻辑
-        pass
+        results = [SearchResult(title="...", url="...", content="...")]
+        return SearchResponse(provider=self.name, results=results)
 ```
 
-然后在 `src/providers/__init__.py` 注册。
+### 2. 注册提供商
 
-## License
+编辑 `src/providers/__init__.py`：
+
+```python
+from .new_provider import NewProvider
+
+PROVIDERS = {
+    "tavily": TavilyProvider,
+    "exa": ExaProvider,
+    "new_provider": NewProvider,  # 添加这行
+}
+```
+
+### 3. 添加 API key
+
+```bash
+python3 search.py --add-key new_provider "your-api-key"
+```
+
+## 📁 项目结构
+
+```
+unified-web-search/
+├── README.md              # 使用说明
+├── LICENSE                # MIT 许可证
+├── .gitignore            # Git 忽略规则
+├── config.example.json   # 配置示例
+├── setup.py              # 包安装配置
+├── install.py            # 交互式安装脚本
+├── search.py             # 主入口脚本
+└── src/
+    ├── __init__.py
+    ├── config.py         # 配置管理
+    ├── key_pool.py       # 全局 key 池轮询
+    ├── search.py         # 统一搜索类
+    └── providers/
+        ├── __init__.py
+        ├── base.py       # 提供商基类
+        ├── tavily.py     # Tavily 实现
+        └── exa.py        # Exa 实现
+```
+
+## 📊 API 限制
+
+| 提供商 | 免费额度 | RPM 限制 | 特点 |
+|--------|---------|---------|------|
+| **Tavily** | 1,000 次/月 | 100 | 返回 AI 答案 |
+| **Exa** | 1,000 次/月 | 1,000 | 语义搜索 |
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+## 📄 License
 
 MIT
