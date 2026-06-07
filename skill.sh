@@ -1,13 +1,22 @@
 #!/usr/bin/env bash
 
 # Local skill registry
-declare -A SKILLS=(
-  [web-search]="skills/web-search/SKILL.md"
-)
+# Compatible with bash 3.2+ (macOS default)
+
+SKILL_web_search="skills/web-search/SKILL.md"
 
 if [[ $# -eq 0 ]]; then
   echo "Usage: source ./skill.sh <skill-name>"
-  echo "Available skills: ${!SKILLS[@]}"
+  echo "Available skills: web-search"
 else
-  echo "${SKILLS[$1]}"
+  case "$1" in
+    web-search)
+      echo "$SKILL_web_search"
+      ;;
+    *)
+      echo "Unknown skill: $1"
+      echo "Available: web-search"
+      exit 1
+      ;;
+  esac
 fi

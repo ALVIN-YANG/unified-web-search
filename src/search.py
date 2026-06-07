@@ -87,41 +87,44 @@ class UnifiedSearch:
         except Exception as e:
             # 故障转移
             if self.config.fallback:
-                return self._fallback_search(query, provider_name, count, depth, **kwargs)
+                return self._fallback_search(query, provider_name, api_key, count, depth, **kwargs)
             return {"error": str(e), "provider": provider_name}
 
     def _fallback_search(
         self,
         query: str,
         failed_provider: str,
+        failed_key: str,
         count: int,
         depth: str,
         **kwargs,
     ) -> Dict[str, Any]:
-        """故障转移搜索"""
+        """故障转移搜索 - 尝试所有其他 key（包括同 provider 的其他 key）"""
         for key_config in self.config.keys:
-            if key_config.provider != failed_provider:
-                try:
-                    provider_class = get_provider(key_config.provider)
-                    proxy_url = self.config.proxy.url if self.config.proxy.enabled else None
-                    provider_instance = provider_class(proxy_url=proxy_url)
+            # 跳过刚才失败的 key
+            if key_config.provider == failed_provider and key_config.key == failed_key:
+                continue
+            try:
+                provider_class = get_provider(key_config.provider)
+                proxy_url = self.config.proxy.url if self.config.proxy.enabled else None
+                provider_instance = provider_class(proxy_url=proxy_url)
 
-                    response = provider_instance.search(
-                        query=query,
-                        api_key=key_config.key,
-                        count=count,
-                        depth=depth,
-                        **kwargs,
-                    )
+                response = provider_instance.search(
+                    query=query,
+                    api_key=key_config.key,
+                    count=count,
+                    depth=depth,
+                    **kwargs,
+                )
 
-                    result = response.to_dict()
-                    result["fallback"] = True
-                    return result
+                result = response.to_dict()
+                result["fallback"] = True
+                return result
 
-                except Exception:
-                    continue
+            except Exception:
+                continue
 
-        return {"error": "All providers failed"}
+        return {"error": "All keys failed"}
 
     def get_status(self) -> Dict[str, Any]:
         """获取配置状态"""

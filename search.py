@@ -93,6 +93,7 @@ Examples:
     parser.add_argument("--add-key", nargs=2, metavar=("PROVIDER", "KEY"), help="添加 API key")
     parser.add_argument("--remove-key", nargs=2, metavar=("PROVIDER", "KEY"), help="移除 API key")
     parser.add_argument("--config", help="配置文件路径")
+    parser.add_argument("--version", "-v", action="version", version="%(prog)s 1.0.0")
 
     args = parser.parse_args()
 

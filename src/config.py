@@ -82,8 +82,18 @@ class ConfigManager:
             self.save()
             return self._config
 
-        with open(self.config_path, "r") as f:
-            data = json.load(f)
+        try:
+            with open(self.config_path, "r") as f:
+                content = f.read().strip()
+                if not content:
+                    self._config = Config()
+                    self.save()
+                    return self._config
+                data = json.loads(content)
+        except (json.JSONDecodeError, IOError):
+            self._config = Config()
+            self.save()
+            return self._config
 
         self._config = Config.from_dict(data)
         return self._config
