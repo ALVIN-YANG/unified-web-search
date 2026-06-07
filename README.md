@@ -25,9 +25,22 @@ python3 install.py
 ```
 
 安装向导会引导你完成：
-1. 代理配置
-2. API key 添加
-3. Claude Code skill 安装
+1. **选择 AI 工具**（支持多选）
+2. 代理配置
+3. API key 添加
+4. 自动安装到对应工具
+
+### 支持的 AI 工具
+
+| 工具 | 安装方式 | 说明 |
+|------|---------|------|
+| **Claude Code** | Skill | Anthropic Claude Code CLI |
+| **Codex (OpenAI)** | Tool | OpenAI Codex CLI |
+| **OpenClaw** | MCP | OpenClaw AI assistant |
+| **Cursor** | MCP | Cursor AI editor |
+| **Windsurf** | MCP | Windsurf AI editor |
+| **Continue** | MCP | Continue VS Code extension |
+| **通用 MCP** | MCP | 任意支持 MCP 协议的 AI |
 
 ### 方式二：手动安装
 
@@ -229,12 +242,32 @@ for r in result.get("results", []):
     print(f"- {r['title']}: {r['url']}")
 ```
 
-### Claude Code Skill
+### 各 AI 工具使用方法
 
-安装后可直接在 Claude Code 中使用：
+#### Claude Code
 
 ```bash
 ~/.claude/skills/web-search/search.py "搜索内容"
+```
+
+#### Codex (OpenAI)
+
+```bash
+~/.codex/tools/web-search/run.sh "搜索内容"
+```
+
+#### Cursor / Windsurf / Continue (MCP)
+
+这些工具通过 MCP 协议集成，安装后会自动注册为可用工具。
+
+在 AI 对话中直接说：
+- "帮我搜索 Python best practices"
+- "用 web_search 搜索 React hooks"
+
+#### 通用方式
+
+```bash
+python3 search.py "搜索内容"
 ```
 
 ## 🔄 轮询机制
@@ -315,8 +348,9 @@ unified-web-search/
 ├── .gitignore            # Git 忽略规则
 ├── config.example.json   # 配置示例
 ├── setup.py              # 包安装配置
-├── install.py            # 交互式安装脚本
+├── install.py            # 交互式安装脚本（支持多 AI 工具）
 ├── search.py             # 主入口脚本
+├── mcp_server.py         # MCP 服务器（自动生成）
 └── src/
     ├── __init__.py
     ├── config.py         # 配置管理
