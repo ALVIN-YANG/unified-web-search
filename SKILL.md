@@ -22,12 +22,17 @@ search.py --check
 
 ## 安装
 
+**手动安装：**
 ```bash
-# 运行安装向导
-python3 install.py
+git clone https://github.com/ALVIN-YANG/unified-web-search.git /tmp/unified-web-search
+cd /tmp/unified-web-search && python3 install.py
 ```
 
-或告诉 AI：`帮我安装 web-search skill`
+**AI 对话安装：**
+复制以下内容给 AI：
+```
+请执行：git clone https://github.com/ALVIN-YANG/unified-web-search.git /tmp/unified-web-search && cd /tmp/unified-web-search && python3 install.py
+```
 
 ## 功能
 
