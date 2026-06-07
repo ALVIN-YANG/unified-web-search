@@ -1,0 +1,1 @@
+web-search: Unified web search with Tavily/Exa providers and global key pool rotation. Automatic failover, proxy support, round-robin key management. Use when the user needs to search the web, find documentation, or get real-time information.

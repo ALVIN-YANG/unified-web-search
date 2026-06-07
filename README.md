@@ -1,208 +1,258 @@
-# Unified Web Search
+<p align="center">
+  <h1 align="center">Unified Web Search</h1>
+  <p align="center">
+    <em>AI-powered web search with multi-provider key rotation</em>
+  </p>
+</p>
 
-统一搜索工具，支持 Tavily、Exa 等多个搜索提供商，全局 key 池轮询。
+<p align="center">
+  <a href="https://github.com/ALVIN-YANG/unified-web-search/stargazers"><img src="https://img.shields.io/github/stars/ALVIN-YANG/unified-web-search?style=for-the-badge&logo=github&labelColor=1e293b&color=fbbf24" alt="GitHub stars"/></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-fbbf24?style=for-the-badge&labelColor=1e293b" alt="MIT License"/></a>
+  <a href="#providers"><img src="https://img.shields.io/badge/Providers-Tavily%20·%20Exa-111827?style=for-the-badge&labelColor=1e293b" alt="Supported providers"/></a>
+</p>
 
-## ✨ 特性
+---
 
-- ✅ **全局 Key 池**：所有 key 统一轮询
-- ✅ **多提供商**：Tavily、Exa
-- ✅ **故障转移**：自动切换失败的 key
-- ✅ **代理支持**：HTTP/HTTPS 代理
-- ✅ **多 AI 工具**：Claude Code、Codex、Cursor 等
+Unified web search tool for AI agents. Supports multiple search providers (Tavily, Exa) with **global key pool rotation**, automatic failover, and HTTP proxy support.
 
-## 📊 并发限制
+<p align="center">
+  <a href="#installing">Install</a> · <a href="#quick-start">Quick Start</a> · <a href="#providers">Providers</a> · <a href="#configuration">Configuration</a> · <a href="#api-keys">API Keys</a> · <a href="#proxy-setup">Proxy</a> · <a href="#faq">FAQ</a>
+</p>
 
-| 提供商 | 免费额度 | RPM | 说明 |
-|--------|---------|-----|------|
-| **Tavily** | 1000 次/月 | 100 | 每分钟 100 请求 |
-| **Exa** | 1000 次/月 | 1000 | 每分钟 1000 请求 |
+---
 
-> **RPM** = Requests Per Minute（每分钟请求数）
+## Installing
 
-## 🚀 快速开始
+### Option 1: AI Conversation (Recommended)
 
-### 方式一：AI 对话安装（推荐）
-
-直接告诉你的 AI 助手：
+Copy this to your AI assistant:
 
 ```
-帮我安装 web-search skill
+Please install the web-search skill:
+git clone https://github.com/ALVIN-YANG/unified-web-search.git /tmp/unified-web-search
+cd /tmp/unified-web-search && python3 install.py
 ```
 
-AI 会引导你完成配置。
-
-### 方式二：命令行安装
+### Option 2: Manual Install
 
 ```bash
-git clone https://github.com/ALVIN-YANG/unified-web-search.git
-cd unified-web-search
-python3 install.py
+git clone https://github.com/ALVIN-YANG/unified-web-search.git /tmp/unified-web-search
+cd /tmp/unified-web-search && python3 install.py
 ```
 
-### 方式三：手动配置
+### Option 3: Using npx skills
 
 ```bash
-# 1. 克隆项目
-git clone https://github.com/ALVIN-YANG/unified-web-search.git
-
-# 2. 创建配置目录
-mkdir -p ~/.config/unified-web-search
-
-# 3. 复制配置文件
-cp config.example.json ~/.config/unified-web-search/config.json
-
-# 4. 编辑配置
-vim ~/.config/unified-web-search/config.json
-
-# 5. 安装到 AI 工具
-ln -s "$(pwd)" ~/.claude/skills/web-search
+npx skills add https://github.com/ALVIN-YANG/unified-web-search
 ```
 
-## ⚙️ 代理配置
+---
 
-如果需要代理访问外部 API：
+## Quick Start
 
-### 常见代理端口
+```bash
+# Basic search
+search.py "Python best practices"
 
-| 代理软件 | 端口 | 地址 |
-|---------|------|------|
-| Clash / Clash Verge | 7897 | `http://localhost:7897` |
-| V2Ray | 10809 | `http://localhost:10809` |
-| Shadowsocks | 1080 | `http://localhost:1080` |
-| Surge | 6152 | `http://localhost:6152` |
+# Specify provider
+search.py "React hooks" --provider exa
 
-### 配置方法
+# Advanced depth
+search.py "machine learning" --depth advanced
 
-编辑 `~/.config/unified-web-search/config.json`：
+# JSON output
+search.py "async tutorial" --json
+
+# Check configuration
+search.py --check
+```
+
+---
+
+## Providers
+
+| Provider | Strengths | Free Tier | RPM |
+|----------|-----------|-----------|-----|
+| **Tavily** | General search, AI-generated answers | 1,000 req/month | 100 |
+| **Exa** | Semantic search, code examples, highlights | 1,000 req/month | 1,000 |
+
+### How Key Rotation Works
+
+```
+┌─────────────────────────────────────────┐
+│           Global Key Pool               │
+│  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐       │
+│  │Key 1│ │Key 2│ │Key 3│ │Key 4│ ...   │
+│  └─────┘ └─────┘ └─────┘ └─────┘       │
+│      ↓       ↓       ↓       ↓         │
+│    Tavily  Exa   Tavily   Exa          │
+└─────────────────────────────────────────┘
+         Round-Robin Rotation
+```
+
+- All keys stored in single pool (not per-provider)
+- Sequential rotation across all keys
+- Automatic failover if key fails
+- Counter persists across restarts
+
+---
+
+## Configuration
+
+Config file: `~/.config/unified-web-search/config.json`
 
 ```json
 {
   "proxy": {
     "enabled": true,
-    "url": "http://localhost:7897"
+    "http": "http://localhost:7897",
+    "https": "http://localhost:7897"
+  },
+  "keys": [
+    {
+      "provider": "tavily",
+      "key": "tvly-dev-xxx"
+    },
+    {
+      "provider": "exa",
+      "key": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    }
+  ]
+}
+```
+
+---
+
+## API Keys
+
+### Get Free Keys
+
+| Provider | Get Key |
+|----------|---------|
+| Tavily | [tavily.com](https://tavily.com) |
+| Exa | [exa.ai](https://exa.ai) |
+
+### Manage Keys
+
+```bash
+# Add keys
+search.py --add-key tavily "tvly-dev-xxx"
+search.py --add-key exa "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Remove key
+search.py --remove-key tavily "tvly-dev-xxx"
+
+# View all keys
+search.py --check
+```
+
+### Why Multiple Keys?
+
+- **Higher throughput**: More keys = more requests per minute
+- **Fault tolerance**: If one key fails, others continue
+- **Load distribution**: Spread requests across keys
+
+---
+
+## Proxy Setup
+
+If you're behind a firewall or using Clash Verge:
+
+### During Installation
+
+The install script will ask:
+```
+需要配置代理吗？(y/n): y
+HTTP 代理地址: http://localhost:7897
+HTTPS 代理地址: http://localhost:7897
+```
+
+### Manual Configuration
+
+Edit `~/.config/unified-web-search/config.json`:
+
+```json
+{
+  "proxy": {
+    "enabled": true,
+    "http": "http://localhost:7897",
+    "https": "http://localhost:7897"
   }
 }
 ```
 
-### 验证代理
+### Common Proxy Ports
 
-```bash
-curl -x http://localhost:7897 https://api.tavily.com
-```
+| Tool | Default Port |
+|------|--------------|
+| Clash Verge | 7897 |
+| V2Ray | 10809 |
+| Shadowsocks | 1080 |
 
-## 🔑 获取 API Key
+---
 
-### Tavily（免费 1000 次/月）
+## Supported AI Tools
 
-1. 访问 https://app.tavily.com/home
-2. 注册账号
-3. 获取 API key
+| Tool | Install Location |
+|------|------------------|
+| Claude Code | `~/.claude/skills/web-search` |
+| Codex | `~/.codex/tools/web-search` |
+| OpenClaw | `~/.openclaw/tools/web-search` |
+| Cursor | `~/.cursor/tools/web-search` |
+| Windsurf | `~/.windsurf/tools/web-search` |
+| Continue | `~/.continue/tools/web-search` |
 
-### Exa（免费 1000 次/月）
+---
 
-1. 访问 https://exa.ai
-2. 注册账号
-3. 获取 API key
+## FAQ
 
-## 📖 使用方法
+**Q: How many keys should I register?**
 
-### 命令行
+A: Start with 2-3 keys. Each Tavily key = 1,000 req/month, each Exa key = 1,000 req/month.
 
-```bash
-# 基本搜索
-search.py "Python best practices"
+**Q: Which provider is better?**
 
-# 指定提供商
-search.py "React hooks" --provider exa
+A: Tavily returns AI-generated answers (good for summaries). Exa is better for semantic/code search.
 
-# 深度搜索
-search.py "AI trends" --depth advanced
+**Q: Can I use both providers?**
 
-# 查看配置
-search.py --check
-```
+A: Yes! Keys from all providers are in one pool. The tool automatically uses the next available key.
 
-### 管理 Key
+**Q: What if a key fails?**
 
-```bash
-# 添加
-search.py --add-key tavily "tvly-xxx"
-search.py --add-key exa "exa-xxx"
+A: The tool automatically tries the next key in the pool. No manual intervention needed.
 
-# 移除
-search.py --remove-key tavily "tvly-xxx"
-```
+**Q: How do I change proxy settings?**
 
-### 各 AI 工具路径
+A: Edit `~/.config/unified-web-search/config.json` or re-run `python3 install.py`.
 
-```bash
-# Claude Code
-~/.claude/skills/web-search/search.py "搜索内容"
+---
 
-# Codex
-~/.codex/tools/web-search/search.py "搜索内容"
-
-# Cursor
-~/.cursor/tools/web-search/search.py "搜索内容"
-
-# Windsurf
-~/.windsurf/tools/web-search/search.py "搜索内容"
-
-# Continue
-~/.continue/tools/web-search/search.py "搜索内容"
-```
-
-## 🔄 轮询机制
-
-所有 key 统一池管理，按顺序轮询：
-
-```
-key1 → key2 → key3 → key1 → ...
-```
-
-不区分提供商，全局轮询。
-
-## 🔁 故障转移
-
-当 `fallback: true` 时：
-1. 主 key 失败
-2. 自动尝试下一个 key
-3. 直到成功或全部失败
-
-## 📁 项目结构
+## Project Structure
 
 ```
 unified-web-search/
-├── SKILL.md              # Skill 说明
-├── README.md             # 完整文档
-├── install.py            # 安装脚本
-├── search.py             # 主入口
-├── config.example.json   # 配置示例
-└── src/
-    ├── config.py         # 配置管理
-    ├── key_pool.py       # Key 池轮询
-    ├── search.py         # 搜索逻辑
-    └── providers/        # 提供商实现
-        ├── tavily.py
-        └── exa.py
+├── skills/
+│   ├── web-search/
+│   │   └── SKILL.md        # AI skill instructions
+│   └── llms.txt            # Quick index for AI
+├── src/
+│   ├── providers/
+│   │   ├── base.py         # Base provider class
+│   │   ├── tavily.py       # Tavily implementation
+│   │   └── exa.py          # Exa implementation
+│   ├── config.py           # Configuration manager
+│   ├── key_pool.py         # Key rotation logic
+│   └── search.py           # Unified search engine
+├── search.py               # CLI entry point
+├── install.py              # Installation script
+├── skill.sh                # Local skill registry
+├── config.example.json     # Example configuration
+└── README.md               # This file
 ```
 
-## 🛠️ 扩展提供商
+---
 
-```python
-# src/providers/new_provider.py
-from .base import BaseProvider, SearchResponse
+## License
 
-class NewProvider(BaseProvider):
-    name = "new_provider"
-
-    def search(self, query, api_key, count=5, **kwargs):
-        # 实现搜索
-        return SearchResponse(provider=self.name, results=[...])
-```
-
-注册：编辑 `src/providers/__init__.py`
-
-## 📄 License
-
-MIT
+[MIT License](LICENSE) · Copyright (c) 2026 ALVIN-YANG
