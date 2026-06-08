@@ -1,5 +1,5 @@
 ---
-name: web-search
+name: unified-web-search
 description: |
   统一搜索工具，支持 Tavily、Exa 等多个搜索提供商，全局 key 池轮询。
   当用户需要搜索网页、获取实时信息、查找文档时使用此 skill。
